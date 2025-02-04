@@ -9,27 +9,27 @@ def confirmar_compra():
     try:
         data = request.json
         nueva_orden = Orden(
-            usuario_id=data['UsuarioId'],
-            subtotal=data['Subtotal'],
-            iva=data['IVA'],
-            envio=data['Envio'],
-            total=data['Total']
+            UsuarioId=data['usuario_id'],
+            Subtotal=data['subtotal'],
+            IVA=data['iva'],
+            Envio=data['envio'],
+            Total=data['total']
         )
         db.session.add(nueva_orden)
         db.session.flush()  # Permite obtener el ID de la orden
 
         for prod in data['productos']:
             detalle = DetalleOrden(
-                orden_id=nueva_orden.Id,
-                producto_id=prod['Id'],
-                cantidad=prod['Cantidad'],
-                precio_unitario=prod['PrecioUnitario']
+                OrdenId=nueva_orden.Id,
+                ProductoId=prod['id'],
+                Cantidad=prod['cantidad'],
+                PrecioUnitario=prod['precio_unitario']
             )
             db.session.add(detalle)
-            producto_db = Producto.query.get(prod['Id'])
+            producto_db = Producto.query.get(prod['id'])
             if producto_db:
-                if producto_db.stock >= prod['Cantidad']:
-                    producto_db.stock -= prod['Cantidad']
+                if producto_db.Stock >= prod['cantidad']:
+                    producto_db.Stock -= prod['cantidad']
                 else:
                     raise Exception(f"Stock insuficiente para {producto_db.Nombre}")
         db.session.commit()

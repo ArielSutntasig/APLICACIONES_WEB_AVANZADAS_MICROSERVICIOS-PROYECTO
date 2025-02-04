@@ -450,7 +450,7 @@
           const iva = subtotal * IVA_RATE;
           const total = subtotal + iva + SHIPPING_COST;
 
-          const response = await fetch(`${API_URL}/cart/confirmar-compra`, {
+          const response = await fetch(`${API_URL}/order/confirmar-compra`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

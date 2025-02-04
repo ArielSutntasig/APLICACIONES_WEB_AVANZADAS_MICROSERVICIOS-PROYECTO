@@ -368,7 +368,7 @@
       if (!confirm("¿Estás seguro de que deseas eliminar este producto?")) return;
 
       try {
-        const response = await fetch(`${API_URL}/productos/${id}`, { method: "DELETE" });
+        const response = await fetch(`${API_URL}/product/productos/${id}`, { method: "DELETE" });
         if (response.ok) {
           alert("Producto eliminado");
           await cargarProductos();
