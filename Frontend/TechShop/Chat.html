@@ -229,10 +229,12 @@
 
     // Función para cargar mensajes
     // In chat.html - Update loadMessages function
+    // Modificar la función loadMessages para usar fetchWithToken
     async function loadMessages() {
       try {
         const targetId = isAsesor ? currentReceptorId : userId;
-        const response = await fetch(`http://localhost:5000/user/mensajes/${targetId}`);
+        const response = await fetchWithToken(`http://localhost:5000/user/mensajes/${targetId}`);
+
         if (!response.ok) {
           throw new Error(`Error del servidor: ${response.status}`);
         }
@@ -243,12 +245,10 @@
           addMessage(msg.contenido, msg.emisor_id, msg.fecha);
         });
 
-        // Mark messages as read if asesor is viewing them
         if (isAsesor && currentReceptorId) {
-          await fetch(`http://localhost:5000/user/marcar-mensajes-leidos/${currentReceptorId}`, {
+          await fetchWithToken(`http://localhost:5000/user/marcar-mensajes-leidos/${currentReceptorId}`, {
             method: 'POST'
           });
-          // Update badge counter
           updateNotificationBadge(currentReceptorId, false);
         }
       } catch (error) {
@@ -256,7 +256,7 @@
       }
     }
 
-
+    // Modificar la función loadActiveClients
     async function loadActiveClients() {
       if (!isAsesor) {
         console.log("Not asesor, skipping load clients");
@@ -266,16 +266,7 @@
       console.log("Loading active clients as asesor...");
 
       try {
-        // Add timeout and proper error handling
-        const response = await fetch("http://localhost:5000/user/obtener-chats-activos", {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          mode: 'cors',
-          timeout: 5000 // 5 second timeout
-        });
+        const response = await fetchWithToken("http://localhost:5000/user/obtener-chats-activos");
 
         console.log("Response received:", response.status);
 
@@ -300,9 +291,9 @@
           listItem.dataset.clientId = client.usuario_id;
 
           listItem.innerHTML = `
-                <span>${client.nombre || 'Usuario sin nombre'}</span>
-                <span class="badge bg-primary">${client.mensajes_no_leidos || 0}</span>
-            `;
+        <span>${client.nombre || 'Usuario sin nombre'}</span>
+        <span class="badge bg-primary">${client.mensajes_no_leidos || 0}</span>
+      `;
 
           listItem.addEventListener("click", () => {
             document.querySelectorAll('#clientsList li').forEach(li => li.classList.remove('active'));
@@ -310,7 +301,6 @@
             currentReceptorId = parseInt(client.usuario_id);
             document.getElementById("chatMessages").innerHTML = "";
             loadMessages();
-            // Reset notification counter when selecting client
             updateNotificationBadge(client.usuario_id, false);
           });
 
@@ -379,16 +369,26 @@
       } else {
         console.log("Regular user - getting asesor ID");
         try {
-          const response = await fetch("http://localhost:5000/user/obtener-asesor");
-          const data = await response.json();
-          currentReceptorId = data.asesor_id;
-          console.log("Asesor ID received:", currentReceptorId);
+          const response = await fetchWithToken("http://localhost:5000/user/obtener-asesor");
+          if (response.ok) {
+            const data = await response.json();
+            currentReceptorId = data.asesor_id;
+            console.log("Asesor ID received:", currentReceptorId);
+          } else {
+            throw new Error("Error getting asesor");
+          }
         } catch (error) {
           console.error("Error getting asesor:", error);
         }
       }
 
-      socket.emit("login", { usuario_id: userId, email: userEmail });
+      // Incluir el token en la información del socket
+      const token = localStorage.getItem('access_token');
+      socket.emit("login", {
+        usuario_id: userId,
+        email: userEmail,
+        token: token
+      });
     });
 
 
@@ -412,6 +412,81 @@
     // Cargar mensajes al inicio
     document.addEventListener("DOMContentLoaded", loadMessages);
     document.addEventListener("DOMContentLoaded", loadActiveClients);
+
+    // Primero agregamos las funciones de manejo de JWT
+    async function refreshToken() {
+      try {
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        const response = await fetch("http://localhost:5000/user/refresh", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${refreshToken}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          localStorage.setItem("access_token", result.access_token);
+          return result.access_token;
+        } else {
+          window.location.replace("index.html");
+          throw new Error('Failed to refresh token');
+        }
+      } catch (error) {
+        console.error('Error refreshing token:', error);
+        window.location.replace("index.html");
+        throw error;
+      }
+    }
+
+    async function fetchWithToken(url, options = {}) {
+      try {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          throw new Error('No token available');
+        }
+
+        const headers = {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token.trim()}`
+        };
+
+        const finalOptions = {
+          ...options,
+          headers: {
+            ...options.headers,
+            ...headers
+          }
+        };
+
+        const response = await fetch(url, finalOptions);
+
+        if (response.status === 401) {
+          const newToken = await refreshToken();
+          if (!newToken) {
+            window.location.replace("index.html");
+            return null;
+          }
+
+          headers.Authorization = `Bearer ${newToken.trim()}`;
+          return fetch(url, { ...options, headers });
+        }
+
+        return response;
+      } catch (error) {
+        console.error('Error in fetchWithToken:', error);
+        if (error.message === 'No token available') {
+          window.location.replace("index.html");
+        }
+        throw error;
+      }
+    }
 
   </script>
 </body>

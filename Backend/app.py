@@ -3,11 +3,11 @@ from config import Config
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-
-
+from flask_jwt_extended import JWTManager
 
 # Creamos una única instancia de SQLAlchemy
 db = SQLAlchemy()
+jwt = JWTManager()
 
 def create_app():
     app = Flask(__name__)
@@ -15,6 +15,7 @@ def create_app():
     
     # Inicializar extensiones
     db.init_app(app)
+    jwt.init_app(app)
     socketio = SocketIO(app, cors_allowed_origins="*", logger=True, engineio_logger=True)
 
     # Habilitar CORS
@@ -26,7 +27,6 @@ def create_app():
     from services.order_service.routes import order_bp
     from services.cart_service.routes import cart_bp
     from services.chat_service.chat_routes import register_socket_events
-    
 
     app.register_blueprint(user_bp, url_prefix="/user")
     app.register_blueprint(product_bp, url_prefix="/product")
@@ -37,8 +37,6 @@ def create_app():
     register_socket_events(socketio)
     
     with app.app_context():
-        # Crear todas las tablas en las bases de datos correspondientes.
-        # SQLAlchemy utiliza la configuración y los binds para distribuir los modelos.
         db.create_all()
     
     return app, socketio

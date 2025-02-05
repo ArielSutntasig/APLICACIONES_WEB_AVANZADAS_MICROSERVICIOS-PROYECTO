@@ -1,4 +1,4 @@
-Flask==3.1.0
+Flask==2.3.3
 Flask-SQLAlchemy==3.1.1
 pyodbc==5.2.0
 Flask-Migrate==3.1.0
@@ -8,3 +8,4 @@ Flask-Login==0.6.2
 flask-socketio
 eventlet
 requests==2.31.0  # Agregado requests
+flask-jwt-extended==4.4.4

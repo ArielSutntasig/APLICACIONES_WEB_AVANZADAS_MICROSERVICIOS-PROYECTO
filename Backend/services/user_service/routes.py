@@ -1,5 +1,11 @@
 from flask import request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    jwt_required,
+    get_jwt_identity
+)
 from . import user_bp
 from app import db
 from .models import Usuario, Mensaje
@@ -35,13 +41,27 @@ def login():
             return jsonify({"error": "Usuario no encontrado"}), 404
         if not check_password_hash(usuario.Contraseña, password):
             return jsonify({"error": "Contraseña incorrecta"}), 401
+
+        # Asegurarse de que el ID sea un string al crear el token
+        access_token = create_access_token(identity=str(usuario.Id))
+        refresh_token = create_refresh_token(identity=str(usuario.Id))
+
         return jsonify({
             "message": "Inicio de sesión exitoso",
             "nombre_completo": usuario.NombreCompleto,
-            "usuario_id": usuario.Id
+            "usuario_id": usuario.Id,
+            "access_token": access_token,
+            "refresh_token": refresh_token
         }), 200
     except Exception as e:
         return jsonify({"error": f"Error en el servidor: {e}"}), 500
+
+@user_bp.route('/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh():
+    current_user_id = get_jwt_identity()
+    access_token = create_access_token(identity=current_user_id)
+    return jsonify({"access_token": access_token}), 200
 
 @user_bp.route('/reset-password', methods=['POST'])
 def reset_password():
@@ -81,6 +101,7 @@ def reset_password():
         return jsonify({"error": f"Error al actualizar la contraseña: {str(e)}"}), 500
 
 @user_bp.route('/usuario/<int:usuario_id>', methods=['GET'])
+@jwt_required()
 def obtener_nombre_usuario(usuario_id):
     try:
         usuario = Usuario.query.get(usuario_id)
@@ -90,8 +111,8 @@ def obtener_nombre_usuario(usuario_id):
     except Exception as e:
         return jsonify({"error": f"Error al obtener el nombre del usuario: {e}"}), 500
 
-
 @user_bp.route('/obtener-asesor', methods=['GET'])
+@jwt_required()
 def obtener_asesor():
     try:
         asesor = Usuario.query.filter_by(Email=ASESOR_EMAIL).first()
@@ -102,6 +123,7 @@ def obtener_asesor():
         return jsonify({"error": str(e)}), 500
 
 @user_bp.route('/obtener-chats-activos')
+@jwt_required()
 def obtener_chats_activos():
     try:
         asesor = Usuario.query.filter_by(Email=ASESOR_EMAIL).first()
@@ -139,6 +161,7 @@ def obtener_chats_activos():
         return jsonify({"error": str(e)}), 500
 
 @user_bp.route('/mensajes/<int:usuario_id>', methods=['GET'])
+@jwt_required()
 def obtener_mensajes(usuario_id):
     try:
         # Obtener el asesor
@@ -166,6 +189,7 @@ def obtener_mensajes(usuario_id):
         return jsonify({"error": str(e)}), 500
 
 @user_bp.route('/marcar-mensajes-leidos/<int:emisor_id>', methods=['POST'])
+@jwt_required()
 def marcar_mensajes_leidos(emisor_id):
     try:
         asesor = Usuario.query.filter_by(Email=ASESOR_EMAIL).first()
