@@ -1,0 +1,46 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependencias
+node_modules/
+
+# Archivos generados de compilación
+dist/
+dist-ssr/
+
+# Archivos locales y de configuración
+*.local
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env*.local
+
+# Caché de Python y archivos compilados
+__pycache__/
+*.pyc
+*.pyo
+
+# Archivos de bases de datos SQLite (si usas SQLite)
+*.sqlite3
+*.db
+
+# Configuración de editores y entornos de desarrollo
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Ignorar entornos virtuales de Python
+venv/
+
+# Archivos de lock innecesarios (si solo usas npm)
+package-lock.json

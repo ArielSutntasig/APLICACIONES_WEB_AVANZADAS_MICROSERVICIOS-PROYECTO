@@ -7,11 +7,11 @@ from .models import Producto
 def agregar_producto():
     data = request.json
     producto = Producto(
-        nombre=data.get('nombre'),
-        precio=data.get('precio'),
-        imagen_url=data.get('imagen_url'),
-        en_oferta=data.get('en_oferta', False),
-        stock=data.get('stock')
+        Nombre=data.get('nombre'),
+        Precio=data.get('precio'),
+        ImagenURL=data.get('imagen_url'),
+        EnOferta=data.get('en_oferta', False),
+        Stock=data.get('stock')
     )
     try:
         db.session.add(producto)
