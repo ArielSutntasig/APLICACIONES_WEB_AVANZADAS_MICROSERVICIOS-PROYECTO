@@ -135,7 +135,7 @@
 
         <div class="d-flex align-items-center">
           <!-- Botón de Cotizaciones -->
-          <a href="Chat.html" class="btn btn-success me-3">
+          <a href="../Chat/Chat.html" class="btn btn-success me-3">
             <i class="fas fa-shopping-cart"></i> Cotizaciones
           </a>
 
@@ -249,7 +249,7 @@
 
       if (!email || email !== "asesor.comercial@gmail.com" || !token) {
         alert("No tienes autorización para acceder a esta página.");
-        window.location.href = "home.html";
+        window.location.href = "../User/home.html";
         return;
       }
 
@@ -393,7 +393,7 @@
       localStorage.removeItem("email_usuario");
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
-      window.location.href = "index.html";
+      window.location.href = "../index.html";
     }
     // Primero agregamos las funciones de manejo de JWT
     async function refreshToken() {
@@ -416,12 +416,12 @@
           localStorage.setItem("access_token", result.access_token);
           return result.access_token;
         } else {
-          window.location.replace("index.html");
+          window.location.replace("../index.html");
           throw new Error('Failed to refresh token');
         }
       } catch (error) {
         console.error('Error refreshing token:', error);
-        window.location.replace("index.html");
+        window.location.replace("../index.html");
         throw error;
       }
     }
@@ -452,7 +452,7 @@
         if (response.status === 401) {
           const newToken = await refreshToken();
           if (!newToken) {
-            window.location.replace("index.html");
+            window.location.replace("../index.html");
             return null;
           }
 
@@ -464,7 +464,7 @@
       } catch (error) {
         console.error('Error in fetchWithToken:', error);
         if (error.message === 'No token available') {
-          window.location.replace("index.html");
+          window.location.replace("../index.html");
         }
         throw error;
       }

@@ -112,7 +112,7 @@
           <input type="checkbox" id="rememberMe" class="form-check-input" />
           <label class="form-check-label" for="rememberMe">Remember me</label>
         </div>
-        <a href="Forgot.html" class="forgot-password">Forgot password?</a>
+        <a href="./Registro/Forgot.html" class="forgot-password">Forgot password?</a>
       </div>
 
       <!-- Botón de login -->
@@ -124,7 +124,7 @@
       <div class="text-center mt-3">
         <span class="signup-text">
           Already have an account?
-          <a href="Sing Up.html" class="Sing up">Sign up</a>
+          <a href="./Registro/Sing Up.html" class="Sing up">Sign up</a>
         </span>
       </div>
     </form>
@@ -181,9 +181,9 @@
 
             // Redirigir según el email
             if (email === "asesor.comercial@gmail.com") {
-              window.location.replace("gestionProductos.html");
+              window.location.replace("./Admin/gestionProductos.html");
             } else {
-              window.location.replace("home.html");
+              window.location.replace("./User/home.html");
             }
           } else {
             const error = await response.json();
