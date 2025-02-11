@@ -1,9 +1,10 @@
 from flask import request
 from flask_socketio import emit
-from services.user_service.models import Usuario, Mensaje
-from app import db
-from datetime import datetime
+import requests
+from . import socketio
 
+# Configuración del servicio de usuarios
+USER_SERVICE_URL = "http://localhost:5001/api/user"
 ASESOR_EMAIL = 'asesor.comercial@gmail.com'
 usuarios_conectados = {}
 
@@ -24,8 +25,9 @@ def register_socket_events(socketio):
                 emit('error', {'error': 'Datos incompletos para el login.'})
                 return
 
-            usuario = Usuario.query.get(usuario_id)
-            if not usuario:
+            # Verificar usuario mediante API
+            response = requests.get(f"{USER_SERVICE_URL}/usuario/{usuario_id}")
+            if response.status_code != 200:
                 emit('error', {'error': 'Usuario no encontrado.'})
                 return
 
@@ -39,27 +41,18 @@ def register_socket_events(socketio):
             
             if email == ASESOR_EMAIL:
                 print("Cargando mensajes pendientes para el asesor.")
-                mensajes_pendientes = Mensaje.query.filter_by(
-                    ReceptorId=usuario_id,  # Cambio a mayúscula
-                    Leido=False  # Cambio a mayúscula
-                ).order_by(Mensaje.Fecha.asc()).all()  # Cambio a mayúscula
-                
-                print(f"Mensajes pendientes encontrados: {len(mensajes_pendientes)}")
-                
-                for mensaje in mensajes_pendientes:
-                    emisor = Usuario.query.get(mensaje.EmisorId)
-                    mensaje_data = {
-                        'id': mensaje.Id,
-                        'emisor_id': mensaje.EmisorId,
-                        'emisor_nombre': emisor.NombreCompleto if emisor else 'Desconocido',
-                        'contenido': mensaje.Contenido,
-                        'fecha': mensaje.Fecha.isoformat()
-                    }
-                    print(f"Enviando mensaje pendiente: {mensaje_data}")
-                    emit('mensaje_nuevo', mensaje_data)
-                    mensaje.Leido = True
-                
-                db.session.commit()
+                # Obtener mensajes pendientes mediante API
+                response = requests.get(f"{USER_SERVICE_URL}/mensajes/pendientes/{usuario_id}")
+                if response.status_code == 200:
+                    mensajes_pendientes = response.json()
+                    
+                    print(f"Mensajes pendientes encontrados: {len(mensajes_pendientes)}")
+                    
+                    for mensaje in mensajes_pendientes:
+                        emit('mensaje_nuevo', mensaje)
+                    
+                    # Marcar mensajes como leídos
+                    requests.post(f"{USER_SERVICE_URL}/mensajes/marcar-leidos/{usuario_id}")
 
             emit('login_success', {
                 'usuario_id': usuario_id,
@@ -77,32 +70,23 @@ def register_socket_events(socketio):
             receptor_id = data.get('receptor_id')
             contenido = data['contenido']
 
-            mensaje = Mensaje(
-                EmisorId=emisor_id,
-                ReceptorId=receptor_id,
-                Contenido=contenido,
-                Leido=False,
-                Fecha=datetime.utcnow()
-            )
-            
-            db.session.add(mensaje)
-            db.session.commit()
+            # Crear mensaje mediante API
+            response = requests.post(f"{USER_SERVICE_URL}/mensajes", json={
+                'emisor_id': emisor_id,
+                'receptor_id': receptor_id,
+                'contenido': contenido
+            })
 
-            mensaje_data = {
-                "id": mensaje.Id,
-                "emisor_id": mensaje.EmisorId,
-                "receptor_id": mensaje.ReceptorId,
-                "contenido": mensaje.Contenido,
-                "fecha": mensaje.Fecha.isoformat(),
-                "leido": mensaje.Leido
-            }
+            if response.status_code != 200:
+                raise Exception("Error al crear el mensaje")
+
+            mensaje_data = response.json()
 
             if str(receptor_id) in usuarios_conectados:
                 emit('mensaje_nuevo', mensaje_data, room=usuarios_conectados[str(receptor_id)]['sid'])
             
             # Si el receptor es el asesor, actualizar notificaciones
-            asesor = Usuario.query.filter_by(Email=ASESOR_EMAIL).first()  # Cambio a mayúscula
-            if asesor and receptor_id == asesor.Id:  # Cambio a mayúscula
+            if str(receptor_id) in usuarios_conectados and usuarios_conectados[str(receptor_id)]['email'] == ASESOR_EMAIL:
                 emit('actualizar_notificacion', {
                     'cliente_id': emisor_id,
                     'increment': True

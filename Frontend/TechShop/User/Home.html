@@ -370,7 +370,7 @@
     // Variables globales
     let productos = [];
     let productosOriginal = [];
-    const API_URL = "http://localhost:5000";
+    const API_URL = "http://localhost:5002";
 
     function navigateToPage(page) {
       window.location.href = page;
@@ -440,7 +440,7 @@
     async function actualizarContadorCarrito(userId) {
       try {
         console.log("Actualizando contador para usuario:", userId);
-        const response = await fetchWithToken(`${API_URL}/cart/carrito/${userId}`);
+        const response = await fetchWithToken(`http://localhost:5004/api/cart/carrito/${userId}`);
 
         if (!response.ok) {
           throw new Error("Error al obtener carrito");
@@ -462,7 +462,7 @@
     async function loadProducts() {
       showLoading();
       try {
-        const response = await fetch(`${API_URL}/product/productos`);
+        const response = await fetch(`http://localhost:5002/api/product/productos`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -589,7 +589,7 @@
 
     try {
         // Agregar estas líneas para verificar y actualizar stock
-        const stockResponse = await fetchWithToken(`${API_URL}/product/productos/${productoId}`);
+        const stockResponse = await fetchWithToken(`http://localhost:5002/api/product/productos/${productoId}`);
         const productoData = await stockResponse.json();
         
         if (productoData.stock <= 0) {
@@ -602,7 +602,7 @@
         }
 
         // El resto de tu código existente
-        const response = await fetchWithToken(`${API_URL}/cart/carrito`, {
+        const response = await fetchWithToken(`http://localhost:5004/api/cart/carrito`, {
             method: "POST",
             body: JSON.stringify({
                 usuario_id: parseInt(userId),
@@ -667,7 +667,7 @@
         console.log('Obteniendo usuario:', usuarioId); // Debug
         console.log('Token actual:', localStorage.getItem('access_token')); // Debug
 
-        const response = await fetchWithToken(`${API_URL}/user/usuario/${usuarioId}`);
+        const response = await fetchWithToken(`http://localhost:5001/api/user/usuario/${usuarioId}`);
 
         console.log('Response status:', response.status); // Debug
 
@@ -828,7 +828,7 @@
           throw new Error('No refresh token available');
         }
 
-        const response = await fetch(`${API_URL}/user/refresh`, {
+        const response = await fetch(`http://localhost:5001/api/user/refresh`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${refreshToken}`,

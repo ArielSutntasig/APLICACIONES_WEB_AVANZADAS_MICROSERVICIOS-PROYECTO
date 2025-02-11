@@ -260,7 +260,7 @@
     // Modificar la función cargarProductos
     async function cargarProductos() {
       try {
-        const response = await fetchWithToken(`${API_URL}/product/productos`);
+        const response = await fetchWithToken(`http://localhost:5002/api/product/productos`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -280,7 +280,7 @@
       productos.forEach((producto) => {
         const imagenURL = producto.imagen_url.startsWith("http")
           ? producto.imagen_url
-          : `${API_URL}${producto.imagen_url}`;
+          : `http://localhost:5002${producto.imagen_url}`;
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -329,7 +329,7 @@
       };
 
       try {
-        const url = id ? `${API_URL}/product/productos/${id}` : `${API_URL}/product/productos`;
+        const url = id ? `http://localhost:5002/api/product/productos/${id}` : `http://localhost:5002/api/product/productos`;
         const method = id ? "PUT" : "POST";
 
         const response = await fetchWithToken(url, {
@@ -369,7 +369,7 @@
       if (!confirm("¿Estás seguro de que deseas eliminar este producto?")) return;
 
       try {
-        const response = await fetchWithToken(`${API_URL}/product/productos/${id}`, {
+        const response = await fetchWithToken(`http://localhost:5002/api/product/productos/${id}`, {
           method: "DELETE"
         });
 
@@ -403,7 +403,7 @@
           throw new Error('No token available');
         }
 
-        const response = await fetch(`${API_URL}/user/refresh`, {
+        const response = await fetch(`http://localhost:5001/api/user/refresh`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${refreshToken}`,

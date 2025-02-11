@@ -196,7 +196,7 @@
     let isAsesor = false;
     let currentReceptorId = null;
 
-    const socket = io("http://localhost:5000");
+    const socket = io("http://localhost:5005");
 
     const userId = parseInt(localStorage.getItem("usuario_id"));
     const userEmail = localStorage.getItem("email_usuario");
@@ -233,7 +233,7 @@
     async function loadMessages() {
       try {
         const targetId = isAsesor ? currentReceptorId : userId;
-        const response = await fetchWithToken(`http://localhost:5000/user/mensajes/${targetId}`);
+        const response = await fetchWithToken(`http://localhost:5001/api/user/mensajes/${targetId}`);
 
         if (!response.ok) {
           throw new Error(`Error del servidor: ${response.status}`);
@@ -246,7 +246,7 @@
         });
 
         if (isAsesor && currentReceptorId) {
-          await fetchWithToken(`http://localhost:5000/user/marcar-mensajes-leidos/${currentReceptorId}`, {
+          await fetchWithToken(`http://localhost:5001/api/user/marcar-mensajes-leidos/${currentReceptorId}`, {
             method: 'POST'
           });
           updateNotificationBadge(currentReceptorId, false);
@@ -266,7 +266,7 @@
       console.log("Loading active clients as asesor...");
 
       try {
-        const response = await fetchWithToken("http://localhost:5000/user/obtener-chats-activos");
+        const response = await fetchWithToken("http://localhost:5001/api/user/obtener-chats-activos");
 
         console.log("Response received:", response.status);
 
@@ -369,7 +369,7 @@
       } else {
         console.log("Regular user - getting asesor ID");
         try {
-          const response = await fetchWithToken("http://localhost:5000/user/obtener-asesor");
+          const response = await fetchWithToken("http://localhost:5001/api/user/obtener-asesor");
           if (response.ok) {
             const data = await response.json();
             currentReceptorId = data.asesor_id;
@@ -421,7 +421,7 @@
           throw new Error('No refresh token available');
         }
 
-        const response = await fetch("http://localhost:5000/user/refresh", {
+        const response = await fetch("http://localhost:5001/api/user/refresh", {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${refreshToken}`,

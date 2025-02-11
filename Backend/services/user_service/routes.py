@@ -1,3 +1,4 @@
+# user_service/routes.py
 from flask import request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import (
@@ -6,8 +7,7 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity
 )
-from . import user_bp
-from app import db
+from . import db, user_bp
 from .models import Usuario, Mensaje
 
 ASESOR_EMAIL = 'asesor.comercial@gmail.com'
@@ -208,3 +208,59 @@ def marcar_mensajes_leidos(emisor_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+    
+@user_bp.route('/mensajes/pendientes/<int:usuario_id>', methods=['GET'])
+def obtener_mensajes_pendientes(usuario_id):
+    try:
+        mensajes = Mensaje.query.filter_by(
+            ReceptorId=usuario_id,
+            Leido=False
+        ).order_by(Mensaje.Fecha.asc()).all()
+        
+        return jsonify([{
+            'id': mensaje.Id,
+            'emisor_id': mensaje.EmisorId,
+            'emisor_nombre': Usuario.query.get(mensaje.EmisorId).NombreCompleto,
+            'contenido': mensaje.Contenido,
+            'fecha': mensaje.Fecha.isoformat()
+        } for mensaje in mensajes]), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@user_bp.route('/mensajes', methods=['POST'])
+def crear_mensaje():
+    try:
+        data = request.json
+        mensaje = Mensaje(
+            EmisorId=data['emisor_id'],
+            ReceptorId=data['receptor_id'],
+            Contenido=data['contenido'],
+            Leido=False
+        )
+        db.session.add(mensaje)
+        db.session.commit()
+        
+        return jsonify({
+            'id': mensaje.Id,
+            'emisor_id': mensaje.EmisorId,
+            'receptor_id': mensaje.ReceptorId,
+            'contenido': mensaje.Contenido,
+            'fecha': mensaje.Fecha.isoformat(),
+            'leido': mensaje.Leido
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@user_bp.route('/mensajes/marcar-leidos/<int:usuario_id>', methods=['POST'])
+def marcar_todos_mensajes_leidos(usuario_id):
+    try:
+        Mensaje.query.filter_by(
+            ReceptorId=usuario_id,
+            Leido=False
+        ).update({'Leido': True})
+        db.session.commit()
+        return jsonify({'message': 'Mensajes marcados como leídos'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500

@@ -1,4 +1,5 @@
-from app import db
+from . import db
+from datetime import timedelta
 
 class Orden(db.Model):
     __bind_key__ = 'order'

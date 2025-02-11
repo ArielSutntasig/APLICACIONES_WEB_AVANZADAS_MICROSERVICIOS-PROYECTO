@@ -1,6 +1,6 @@
+# product_service/routes.py
 from flask import request, jsonify
-from . import product_bp
-from app import db
+from . import product_bp, db
 from .models import Producto
 
 @product_bp.route('/productos', methods=['POST'])
@@ -80,7 +80,7 @@ def obtener_producto(producto_id):
         producto = Producto.query.get(producto_id)
         if not producto:
             return jsonify({"error": "Producto no encontrado"}), 404
-        
+
         return jsonify({
             "id": producto.Id,
             "nombre": producto.Nombre,
@@ -90,4 +90,42 @@ def obtener_producto(producto_id):
             "stock": producto.Stock
         }), 200
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@product_bp.route('/stock/<int:producto_id>', methods=['GET'])
+def obtener_stock(producto_id):
+    try:
+        producto = Producto.query.get(producto_id)
+        if not producto:
+            return jsonify({"error": "Producto no encontrado"}), 404
+        return jsonify({
+            "id": producto.Id,
+            "nombre": producto.Nombre,
+            "stock": producto.Stock
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@product_bp.route('/actualizar-stock/<int:producto_id>', methods=['PUT'])
+def actualizar_stock(producto_id):
+    try:
+        data = request.json
+        cantidad = data.get('cantidad')
+        
+        producto = Producto.query.get(producto_id)
+        if not producto:
+            return jsonify({"error": "Producto no encontrado"}), 404
+            
+        if producto.Stock < cantidad:
+            return jsonify({"error": "Stock insuficiente"}), 400
+            
+        producto.Stock -= cantidad
+        db.session.commit()
+        
+        return jsonify({
+            "message": "Stock actualizado correctamente",
+            "nuevo_stock": producto.Stock
+        }), 200
+    except Exception as e:
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500
