@@ -429,6 +429,7 @@
       console.log("Iniciando carga del carrito...");
       const userId = localStorage.getItem("usuario_id");
       console.log("ID de usuario:", userId);
+      console.log("Token de acceso:", localStorage.getItem("access_token"));
 
       if (!userId) {
         console.log("No hay usuario logueado");

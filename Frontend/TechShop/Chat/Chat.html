@@ -349,6 +349,10 @@
     // Conexión y login
     // At the start of chat.html
     console.log("Starting chat application...");
+    console.log("User ID:", userId);
+    console.log("User email:", userEmail);
+    console.log("Connecting to socket server...");
+    console.log("Token:", localStorage.getItem('access_token'));
 
     socket.on("connect", async () => {
       console.log("Socket connected with ID:", socket.id);

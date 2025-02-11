@@ -246,6 +246,7 @@
       const email = localStorage.getItem("email_usuario");
       const token = localStorage.getItem("access_token");
       console.log("Email almacenado:", email);
+      console.log("Token almacenado:", token);
 
       if (!email || email !== "asesor.comercial@gmail.com" || !token) {
         alert("No tienes autorización para acceder a esta página.");
