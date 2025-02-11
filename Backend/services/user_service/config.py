@@ -3,9 +3,9 @@ from datetime import timedelta
 
 class Config:
     # Database configuration
-    SQLALCHEMY_DATABASE_URI = "mssql+pyodbc://sa:Politecnica1@localhost/TechShop_UserService?driver=ODBC+Driver+17+for+SQL+Server"
+    SQLALCHEMY_DATABASE_URI = "mssql+pyodbc://administrador:admin1234#@apps-server.database.windows.net:1433/TechShop_UserService?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=no&Encrypt=yes"
     SQLALCHEMY_BINDS = {
-        'user': "mssql+pyodbc://sa:Politecnica1@localhost/TechShop_UserService?driver=ODBC+Driver+17+for+SQL+Server"
+        'user': "mssql+pyodbc://administrador:admin1234#@apps-server.database.windows.net:1433/TechShop_UserService?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=no&Encrypt=yes"
     }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True

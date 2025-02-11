@@ -264,3 +264,27 @@ def marcar_todos_mensajes_leidos(usuario_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+    
+
+@user_bp.route('/usuarios', methods=['GET'])
+def obtener_usuarios():
+    try:
+        # Obtener todos los usuarios excepto el asesor
+        usuarios = Usuario.query.filter(Usuario.Email != ASESOR_EMAIL).all()
+        
+        # Convertir a formato JSON
+        usuarios_lista = [{
+            'id': usuario.Id,
+            'nombre_completo': usuario.NombreCompleto,
+            'email': usuario.Email,
+            'fecha_registro': usuario.FechaRegistro.isoformat() if usuario.FechaRegistro else None
+        } for usuario in usuarios]
+        
+        return jsonify({
+            'usuarios': usuarios_lista,
+            'total': len(usuarios_lista)
+        }), 200
+    except Exception as e:
+        print(f"Error al obtener usuarios: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+    
