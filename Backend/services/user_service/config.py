@@ -1,11 +1,23 @@
 import os
 from datetime import timedelta
+from urllib.parse import quote_plus
 
 class Config:
     # Database configuration
-    SQLALCHEMY_DATABASE_URI = "mssql+pyodbc://administrador:admin1234#@apps-server.database.windows.net:1433/TechShop_UserService?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=no&Encrypt=yes"
+    connection_string = (
+        "Driver={ODBC Driver 17 for SQL Server};"
+        "Server=tcp:apps-server.database.windows.net,1433;"
+        "Database=TechShop_UserService;"
+        "Uid=administrador;"
+        "Pwd=admin1234#;"
+        "Encrypt=yes;"
+        "TrustServerCertificate=no;"
+        "Connection Timeout=30;"
+    )
+
+    SQLALCHEMY_DATABASE_URI = f"mssql+pyodbc:///?odbc_connect={quote_plus(connection_string)}"
     SQLALCHEMY_BINDS = {
-        'user': "mssql+pyodbc://administrador:admin1234#@apps-server.database.windows.net:1433/TechShop_UserService?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=no&Encrypt=yes"
+        'user': f"mssql+pyodbc:///?odbc_connect={quote_plus(connection_string)}"
     }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True

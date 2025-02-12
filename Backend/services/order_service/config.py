@@ -5,7 +5,7 @@ from urllib.parse import quote_plus
 class Config:
     # Database configuration
     connection_string = (
-        "Driver={ODBC Driver 18 for SQL Server};"
+        "Driver={ODBC Driver 17 for SQL Server};"
         "Server=tcp:apps-server.database.windows.net,1433;"
         "Database=TechShop_OrderService;"
         "Uid=administrador;"

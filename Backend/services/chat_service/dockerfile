@@ -1,0 +1,33 @@
+# Usa la imagen oficial de Python (versión slim)
+FROM python:3.11-slim-buster
+
+# Instala dependencias del sistema (aquí se incluyen utilidades básicas)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Establece el directorio de trabajo
+WORKDIR /app
+
+# Copia el archivo de requerimientos e instala las dependencias de Python
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Crea un directorio para el paquete "chat_service" y copia todos los archivos ahí
+RUN mkdir -p /app/chat_service
+COPY . /app/chat_service/
+
+# Configura las variables de entorno para que Flask sepa qué módulo ejecutar
+# Aquí, al tener la carpeta "chat_service" en /app, FLASK_APP debe apuntar a "chat_service.app"
+ENV FLASK_APP=chat_service.app
+ENV FLASK_DEBUG=1
+ENV FLASK_RUN_PORT=5005
+ENV SECRET_KEY=tu-clave-secreta-muy-segura
+
+# Expone el puerto en el que se ejecutará la aplicación
+EXPOSE 5005
+
+# Comando para iniciar la aplicación (usando flask run)
+CMD ["flask", "run", "--host=0.0.0.0"]

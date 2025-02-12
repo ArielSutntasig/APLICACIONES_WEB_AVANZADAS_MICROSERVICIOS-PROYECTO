@@ -1,0 +1,52 @@
+services:
+  
+  user-service:
+    build: ./Backend/services/user_service
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=1
+      - DATABASE_URL='mssql+pyodbc://administrador:admin1234%23@apps-server.database.windows.net:1433/TechShop_UserService?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=no&Encrypt=yes'
+    restart: unless-stopped
+
+  product-service:
+    build: ./Backend/services/product_service
+    ports:
+      - "5002:5002"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=1
+      - DATABASE_URL='mssql+pyodbc://administrador:admin1234%23@apps-server.database.windows.net:1433/TechShop_ProductService?driver=ODBC+Driver+17+for+SQL+Server&TrustServerCertificate=no&Encrypt=yes&Connection Timeout=30;'
+    restart: unless-stopped
+
+  order-service:
+    build: ./Backend/services/order_service
+    ports:
+      - "5003:5003"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=1
+      - DATABASE_URL='mssql+pyodbc://administrador:admin1234%23@apps-server.database.windows.net:1433/TechShop_OrderService?driver=ODBC+Driver+17+for+SQL+Server&TrustServerCertificate=no&Encrypt=yes&Connection Timeout=30;'
+    restart: unless-stopped
+
+  cart-service:
+    build: ./Backend/services/cart_service
+    ports:
+      - "5004:5004"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=1
+      - DATABASE_URL='mssql+pyodbc://administrador:admin1234%23@apps-server.database.windows.net:1433/TechShop_CartService?driver=ODBC+Driver+17+for+SQL+Server&TrustServerCertificate=no&Encrypt=yes&Connection Timeout=30;'
+    restart: unless-stopped
+
+  chat-service:
+    build: ./Backend/services/chat_service
+    ports:
+      - "5005:5005"
+    environment:
+      - FLASK_APP=chat_service.app
+      - FLASK_DEBUG=1
+      - SECRET_KEY=tu-clave-secreta-muy-segura
+    restart: unless-stopped
+

@@ -1,5 +1,5 @@
 # order_service/app.py
-from cart_service import create_app
+from . import create_app
 
 app = create_app()
 

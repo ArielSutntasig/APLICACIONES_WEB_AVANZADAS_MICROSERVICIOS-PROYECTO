@@ -4,7 +4,7 @@ from . import cart_bp, db
 from .models import Carrito
 
 # Configuración del servicio de productos
-PRODUCT_SERVICE_URL = "http://localhost:5002/api/product"
+PRODUCT_SERVICE_URL = "http://product-service:5002/api/product"
 
 @cart_bp.route('/carrito/<int:usuario_id>', methods=['GET'])
 def obtener_carrito(usuario_id):

@@ -1,5 +1,5 @@
 # app.py
-from product_service import create_app
+from . import create_app
 
 app = create_app()
 

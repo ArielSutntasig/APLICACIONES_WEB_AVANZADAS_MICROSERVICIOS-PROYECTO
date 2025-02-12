@@ -4,7 +4,7 @@ import requests
 from . import socketio
 
 # Configuración del servicio de usuarios
-USER_SERVICE_URL = "http://localhost:5001/api/user"
+USER_SERVICE_URL = "http://user-service:5001/api/user"
 ASESOR_EMAIL = 'asesor.comercial@gmail.com'
 usuarios_conectados = {}
 

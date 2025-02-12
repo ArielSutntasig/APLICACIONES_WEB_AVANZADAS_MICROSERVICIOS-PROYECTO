@@ -438,12 +438,12 @@
           localStorage.setItem("access_token", result.access_token);
           return result.access_token;
         } else {
-          window.location.replace("index.html");
+          window.location.replace("../index.html");
           throw new Error('Failed to refresh token');
         }
       } catch (error) {
         console.error('Error refreshing token:', error);
-        window.location.replace("index.html");
+        window.location.replace("../index.html");
         throw error;
       }
     }
@@ -474,7 +474,7 @@
         if (response.status === 401) {
           const newToken = await refreshToken();
           if (!newToken) {
-            window.location.replace("index.html");
+            window.location.replace("../index.html");
             return null;
           }
 

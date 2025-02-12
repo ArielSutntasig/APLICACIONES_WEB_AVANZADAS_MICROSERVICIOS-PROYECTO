@@ -4,7 +4,7 @@ from . import order_bp, db
 from .models import Orden, DetalleOrden
 
 # Configuración del servicio de productos
-PRODUCT_SERVICE_URL = "http://localhost:5002/api/product"
+PRODUCT_SERVICE_URL = "http://product-service:5002/api/product"
 
 @order_bp.route('/confirmar-compra', methods=['POST'])
 def confirmar_compra():
